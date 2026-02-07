@@ -9,8 +9,9 @@ export default function SearchBar({ onSearch }) {
   }
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form className="SearchBar" onSubmit={handleSubmit}>
       <input
+
         value={term}
         onChange={(e) => setTerm(e.target.value)}
         placeholder="Search songs, artists, albums..."

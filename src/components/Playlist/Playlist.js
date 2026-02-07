@@ -1,24 +1,38 @@
+import React from "react";
 import Tracklist from "../Tracklist/Tracklist";
 
-export default function Playlist({
+const Playlist = ({
   playlistName,
   playlistTracks,
-  onRemove,
   onNameChange,
+  onRemove,
   onSave,
-}) {
+  playingTrackId,
+  onPlayPreview,
+  onPausePreview,
+}) => {
   return (
-    <div>
-      <h2>Playlist</h2>
+    <div className="Playlist">
+      <h2>Your Playlist</h2>
 
       <input
         value={playlistName}
         onChange={(e) => onNameChange(e.target.value)}
+        placeholder="New Playlist Name"
       />
 
-      <Tracklist tracks={playlistTracks} actionLabel="-" onAction={onRemove} />
+      <Tracklist
+        tracks={playlistTracks}
+        actionLabel="-"
+        onAction={onRemove}
+        playingTrackId={playingTrackId}
+        onPlayPreview={onPlayPreview}
+        onPausePreview={onPausePreview}
+      />
 
-      <button onClick={onSave}>Save To Spotify</button>
+      <button onClick={onSave}>SAVE TO SPOTIFY</button>
     </div>
   );
-}
+};
+
+export default Playlist;

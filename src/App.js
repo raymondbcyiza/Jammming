@@ -1,8 +1,9 @@
-import { useState } from "react";
+import React, { useRef, useState } from "react";
 import SearchBar from "./components/SearchBar/SearchBar";
 import SearchResults from "./components/SearchResults/SearchResults";
 import Playlist from "./components/Playlist/Playlist";
 import Spotify from "./util/Spotify";
+import "./App.css";
 
 // Temporary data until Spotify API is hooked up
 const MOCK_TRACKS = [
@@ -16,7 +17,9 @@ export default function App() {
   const [searchResults, setSearchResults] = useState(MOCK_TRACKS);
   const [playlistName, setPlaylistName] = useState("New Playlist");
   const [playlistTracks, setPlaylistTracks] = useState([]);
-
+  const [playingTrackId, setPlayingTrackId] = useState(null);
+  const audioRef = useRef(null);
+  
   function addTrack(track) {
     setPlaylistTracks((prev) => {
       // prevent duplicates
@@ -57,23 +60,66 @@ export default function App() {
       alert("Save failed. Check console for details.");
     }
   }
+  const playPreview = (track) => {
+    if (!track?.previewUrl) return;
+  
+    // toggle: if same track is playing, pause it
+    if (playingTrackId === track.id) {
+      audioRef.current?.pause();
+      setPlayingTrackId(null);
+      return;
+    }
+  
+    // stop current audio if any
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+  
+    audioRef.current = new Audio(track.previewUrl);
+  
+    audioRef.current.onended = () => {
+      setPlayingTrackId(null);
+    };
+  
+    audioRef.current
+      .play()
+      .then(() => setPlayingTrackId(track.id))
+      .catch(() => setPlayingTrackId(null));
+  };
+  
+  const pausePreview = () => {
+    audioRef.current?.pause();
+    setPlayingTrackId(null);
+  };
 
   return (
-    <div>
-      <h1>Jammming</h1>
+    <div className="App">
+  <h1>Jammming</h1>
 
-      <SearchBar onSearch={search} />
+  <SearchBar onSearch={search} />
 
-      <div style={{ display: "flex", gap: 24, alignItems: "flex-start" }}>
-        <SearchResults searchResults={searchResults} onAdd={addTrack} />
-        <Playlist
-          playlistName={playlistName}
-          playlistTracks={playlistTracks}
-          onRemove={removeTrack}
-          onNameChange={updatePlaylistName}
-          onSave={savePlaylist}
-        />
-      </div>
-    </div>
+  <div className="App-playlist">
+    <SearchResults
+      searchResults={searchResults}
+      onAdd={addTrack}
+      playingTrackId={playingTrackId}
+      onPlayPreview={playPreview}
+      onPausePreview={pausePreview}
+    />
+
+    <Playlist
+      playlistName={playlistName}
+      playlistTracks={playlistTracks}
+      onNameChange={setPlaylistName}
+      onRemove={removeTrack}
+      onSave={savePlaylist}
+      playingTrackId={playingTrackId}
+      onPlayPreview={playPreview}
+      onPausePreview={pausePreview}
+    />
+  </div>
+</div>
+
   );
 }
